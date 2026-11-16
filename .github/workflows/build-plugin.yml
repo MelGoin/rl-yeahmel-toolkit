@@ -1,0 +1,33 @@
+name: Build YeahMel Coach plugin
+
+on:
+  push:
+    paths: ['bakkesmod-plugin/**', '.github/workflows/build-plugin.yml']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get the BakkesMod SDK
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force C:\bm | Out-Null
+          git clone --depth 1 https://github.com/bakkesmodorg/BakkesModSDK C:\bm\bakkesmodsdk
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Build (Release x64)
+        shell: pwsh
+        working-directory: bakkesmod-plugin/YeahMelCoach
+        run: >
+          msbuild YeahMelCoach.vcxproj /m /p:Configuration=Release /p:Platform=x64
+          /p:BakkesModPath=C:\bm /p:PostBuildEventUseInBuild=false /p:SolutionDir=$PWD\
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: YeahMelCoach-plugin
+          path: bakkesmod-plugin/YeahMelCoach/plugins/YeahMelCoach.dll
+          if-no-files-found: error
