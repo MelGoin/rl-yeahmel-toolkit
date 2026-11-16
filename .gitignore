@@ -1,3 +1,5 @@
 node_modules/
 data/
 *.log
+bakkesmod-plugin/YeahMelCoach/build/
+bakkesmod-plugin/YeahMelCoach/plugins/
