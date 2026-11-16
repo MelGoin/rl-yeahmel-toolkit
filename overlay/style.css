@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;600;800&display=swap');
+
+:root {
+  --blue: #1873ff;
+  --orange: #ff7a1a;
+  --gold: #f5c542;
+  --panel: rgba(10, 12, 18, 0.82);
+  --panel-edge: rgba(255, 255, 255, 0.08);
+  --text: #f4f6fb;
+  --muted: #9aa3b5;
+  --display: 'Rajdhani', 'Arial Narrow', sans-serif;
+  --body: 'Inter', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* OBS browser sources are transparent by default - keep the page background clear */
+html, body { background: transparent; color: var(--text); font-family: var(--body); overflow: hidden; }
+
+/* Add ?preview to any overlay URL to see it on a dark background in a normal browser */
+body.preview { background: radial-gradient(circle at 50% 30%, #2a3550, #0b0e16 70%); }
+
+.tabular { font-variant-numeric: tabular-nums; }

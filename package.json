@@ -1,0 +1,14 @@
+{
+  "name": "rl-yeahmel-toolkit",
+  "version": "1.0.0",
+  "description": "Live Rocket League stats + OBS stream overlays powered by the official Psyonix Stats API",
+  "main": "relay/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node relay/server.js",
+    "demo": "node relay/server.js --demo",
+    "test": "node relay/parser.test.js"
+  },
+  "license": "MIT",
+  "dependencies": { "ws": "^8.18.0" }
+}

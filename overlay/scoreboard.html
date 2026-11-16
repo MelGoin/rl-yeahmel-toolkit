@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>YeahMel Scoreboard</title>
+<link rel="stylesheet" href="style.css" />
+<style>
+  /* Designed for a 1920x1080 OBS browser source */
+  body { width: 1920px; height: 1080px; position: relative; }
+
+  /* ---------- scorebug ---------- */
+  .bug { position: absolute; top: 18px; left: 50%; transform: translateX(-50%);
+    display: grid; grid-template-columns: 300px 90px 170px 90px 300px; height: 72px;
+    filter: drop-shadow(0 8px 24px rgba(0,0,0,.45)); }
+  .team { display: flex; align-items: center; padding: 0 22px; font-family: var(--display);
+    font-weight: 700; font-size: 30px; letter-spacing: .06em; text-transform: uppercase; }
+  .team.blue { background: linear-gradient(90deg, transparent, var(--blue) 30%); justify-content: flex-end; border-radius: 10px 0 0 10px; }
+  .team.orange { background: linear-gradient(270deg, transparent, var(--orange) 30%); border-radius: 0 10px 10px 0; }
+  .score { display: grid; place-items: center; font-family: var(--display); font-size: 52px; font-weight: 700; }
+  .score.blue { background: color-mix(in srgb, var(--blue) 75%, black); }
+  .score.orange { background: color-mix(in srgb, var(--orange) 75%, black); }
+  .center { background: var(--panel); border-top: 1px solid var(--panel-edge); display: grid;
+    place-items: center; align-content: center; gap: 0; }
+  .clock { font-family: var(--display); font-size: 42px; font-weight: 700; line-height: 1; }
+  .clock.ot { color: var(--gold); }
+  .sub { font-size: 11px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+  .brand { position: absolute; top: 96px; left: 50%; transform: translateX(-50%); font-family: var(--display);
+    font-weight: 700; letter-spacing: .35em; font-size: 14px; color: var(--gold); background: var(--panel);
+    padding: 4px 16px; border-radius: 0 0 8px 8px; }
+
+  /* ---------- player boards ---------- */
+  .roster { position: absolute; bottom: 40px; width: 360px; display: grid; gap: 8px; }
+  .roster.blue { left: 30px; } .roster.orange { right: 30px; }
+  .p { background: var(--panel); border: 1px solid var(--panel-edge); border-radius: 8px; padding: 10px 14px; position: relative; overflow: hidden; }
+  .roster.blue .p { border-left: 4px solid var(--blue); }
+  .roster.orange .p { border-right: 4px solid var(--orange); text-align: right; }
+  .p.target { box-shadow: 0 0 0 2px var(--gold); }
+  .p .row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .roster.orange .p .row { flex-direction: row-reverse; }
+  .p .name { font-weight: 600; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .p .stats { font-size: 13px; color: var(--muted); }
+  .p .stats b { color: var(--text); }
+  .boost { height: 6px; background: rgba(255,255,255,.08); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .boost i { display: block; height: 100%; width: 0; transition: width .15s linear; }
+  .roster.blue .boost i { background: var(--blue); }
+  .roster.orange .boost i { background: var(--orange); margin-left: auto; }
+  .p.ss .name::after { content: ' ⚡'; color: var(--gold); }
+
+  /* ---------- goal banner ---------- */
+  .goal { position: absolute; top: 380px; left: 50%; transform: translate(-50%, 0) scale(.9); opacity: 0;
+    transition: opacity .35s, transform .35s; text-align: center; padding: 26px 70px; border-radius: 16px;
+    background: var(--panel); border: 2px solid var(--blue); min-width: 640px; }
+  .goal.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  .goal.orange { border-color: var(--orange); }
+  .goal h1 { font-family: var(--display); font-size: 110px; line-height: .9; letter-spacing: .08em; }
+  .goal .who { font-size: 30px; font-weight: 800; margin-top: 8px; }
+  .goal .meta { color: var(--muted); font-size: 18px; margin-top: 6px; }
+  .goal .kph { color: var(--gold); font-weight: 800; }
+
+  /* ---------- stat feed ---------- */
+  .feed { position: absolute; top: 24px; right: 30px; width: 380px; display: grid; gap: 6px; }
+  .f { background: var(--panel); border-radius: 6px; padding: 8px 12px; font-size: 15px; display: flex; gap: 8px;
+    animation: slide .3s ease-out; }
+  .f .t { color: var(--gold); font-weight: 700; }
+  .f.blue { border-left: 3px solid var(--blue); } .f.orange { border-left: 3px solid var(--orange); }
+  @keyframes slide { from { transform: translateX(30px); opacity: 0; } }
+
+  .offline { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); font-size: 13px;
+    color: var(--muted); background: var(--panel); padding: 4px 12px; border-radius: 6px; display: none; }
+</style>
+</head>
+<body>
+  <div class="bug">
+    <div class="team blue" id="blueName">Blue</div>
+    <div class="score blue tabular" id="blueScore">0</div>
+    <div class="center">
+      <div class="clock tabular" id="clock">5:00</div>
+      <div class="sub tabular" id="ball">ball 0 km/h</div>
+    </div>
+    <div class="score orange tabular" id="orangeScore">0</div>
+    <div class="team orange" id="orangeName">Orange</div>
+  </div>
+  <div class="brand" id="brand">YEAHMEL</div>
+
+  <div class="roster blue" id="rosterBlue"></div>
+  <div class="roster orange" id="rosterOrange"></div>
+
+  <div class="goal" id="goal">
+    <h1>GOAL</h1>
+    <div class="who" id="goalWho"></div>
+    <div class="meta" id="goalMeta"></div>
+  </div>
+
+  <div class="feed" id="feed"></div>
+  <div class="offline" id="offline">Waiting for Rocket League...</div>
+
+<script src="overlay.js"></script>
+<script>
+  const $ = (id) => document.getElementById(id);
+  if (location.search.includes('preview')) document.body.classList.add('preview');
+  $('brand').textContent = RL.param('brand', 'YEAHMEL').toUpperCase();
+  let goalTimer, lastGoalAt = 0, lastFeedKey = '';
+
+  function renderRoster(el, players, target) {
+    el.innerHTML = players.map((p) => {
+      // Boost/speed only come through while spectating; hide the bar otherwise.
+      const hasBoost = typeof p.Boost === 'number';
+      return `<div class="p ${p.Name === target ? 'target' : ''} ${p.bSupersonic ? 'ss' : ''}">
+        <div class="row"><span class="name">${RL.esc(p.Name)}</span>
+          <span class="stats tabular"><b>${p.Score ?? 0}</b> · ${p.Goals ?? 0}G ${p.Assists ?? 0}A ${p.Saves ?? 0}S</span></div>
+        ${hasBoost ? `<div class="boost"><i style="width:${p.Boost}%"></i></div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function showGoal(g) {
+    const box = $('goal');
+    box.classList.toggle('orange', g.team === 1);
+    $('goalWho').textContent = g.scorer;
+    $('goalMeta').innerHTML = `<span class="kph">${g.kph} km/h</span>${g.assister ? ` · assist ${RL.esc(g.assister)}` : ''}`;
+    box.classList.add('show');
+    clearTimeout(goalTimer);
+    goalTimer = setTimeout(() => box.classList.remove('show'), 4500);
+  }
+
+  RL.connect((msg) => {
+    const { live } = msg;
+    $('offline').style.display = live.connected ? 'none' : 'block';
+    const g = live.game;
+    if (g) {
+      const [b, o] = g.Teams || [];
+      if (b) { $('blueName').textContent = b.Name; $('blueScore').textContent = b.Score;
+        if (b.ColorPrimary && !RL.param('blue')) document.documentElement.style.setProperty('--blue', '#' + b.ColorPrimary); }
+      if (o) { $('orangeName').textContent = o.Name; $('orangeScore').textContent = o.Score;
+        if (o.ColorPrimary && !RL.param('orange')) document.documentElement.style.setProperty('--orange', '#' + o.ColorPrimary); }
+      $('clock').textContent = RL.clock(g.TimeSeconds, g.bOvertime);
+      $('clock').classList.toggle('ot', !!g.bOvertime);
+      $('ball').textContent = `ball ${RL.kph(g.Ball?.Speed)} km/h`;
+      const target = g.Target?.Name;
+      renderRoster($('rosterBlue'), live.players.filter((p) => p.TeamNum === 0), target);
+      renderRoster($('rosterOrange'), live.players.filter((p) => p.TeamNum === 1), target);
+    }
+    if (live.lastGoal && live.lastGoal.at !== lastGoalAt) {
+      lastGoalAt = live.lastGoal.at;
+      if (msg.event === 'GoalScored') showGoal(live.lastGoal);
+    }
+    const feedKey = live.feed.map((f) => f.at).join();
+    if (feedKey === lastFeedKey) return;
+    lastFeedKey = feedKey;
+    $('feed').innerHTML = live.feed.slice(0, 5).map((f) =>
+      `<div class="f ${f.team === 1 ? 'orange' : 'blue'}"><span class="t">${RL.esc(f.type)}</span>
+       <span>${RL.esc(f.who)}${f.victim ? ` → ${RL.esc(f.victim)}` : ''}</span></div>`).join('');
+  });
+
+  // Custom team colors from the URL, e.g. scoreboard.html?blue=00C2FF&orange=FF3B6B
+  if (RL.param('blue')) document.documentElement.style.setProperty('--blue', '#' + RL.param('blue'));
+  if (RL.param('orange')) document.documentElement.style.setProperty('--orange', '#' + RL.param('orange'));
+</script>
+</body>
+</html>

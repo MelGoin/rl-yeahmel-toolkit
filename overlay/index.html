@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>YeahMel RL Toolkit - Control Panel</title>
+<link rel="stylesheet" href="style.css" />
+<style>
+  html, body { background: #0b0e16; overflow: auto; }
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 60px; }
+  h1 { font-family: var(--display); letter-spacing: .2em; color: var(--gold); font-size: 34px; }
+  p.lead { color: var(--muted); margin: 6px 0 28px; }
+  .status { display: inline-flex; gap: 8px; align-items: center; padding: 6px 12px; border-radius: 999px;
+    background: #151a26; font-size: 14px; margin-bottom: 28px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: #ff5470; }
+  .dot.on { background: #3ddc84; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .tile { background: #121725; border: 1px solid #1f2638; border-radius: 12px; padding: 18px; }
+  .tile h3 { font-size: 16px; margin-bottom: 4px; }
+  .tile code { display: block; background: #0b0e16; padding: 8px 10px; border-radius: 6px; font-size: 13px;
+    color: #cfd6e6; margin: 10px 0; word-break: break-all; }
+  .tile small { color: var(--muted); }
+  .frame { width: 100%; aspect-ratio: 16/9; border-radius: 8px; overflow: hidden; background: #000; position: relative; }
+  .frame iframe { width: 1920px; height: 1080px; border: 0; transform-origin: 0 0; position: absolute; }
+  button { margin-top: 18px; background: #1f2638; color: var(--text); border: 0; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+  button:hover { background: #2a3350; }
+</style>
+</head>
+<body>
+<main>
+  <h1>YEAHMEL RL TOOLKIT</h1>
+  <p class="lead">Live stats from Rocket League's official Stats API, ready for OBS.</p>
+  <div class="status"><span class="dot" id="dot"></span><span id="statusText">Connecting...</span></div>
+
+  <div class="tile" style="margin-bottom:20px">
+    <h3>Live preview</h3>
+    <div class="frame" id="frame"><iframe src="scoreboard.html?preview" id="pv"></iframe></div>
+  </div>
+
+  <div class="grid">
+    <div class="tile">
+      <h3>Scoreboard overlay</h3>
+      <small>OBS → Sources → + → Browser. Width 1920, height 1080.</small>
+      <code id="u1"></code>
+    </div>
+    <div class="tile">
+      <h3>Session stats card</h3>
+      <small>OBS Browser source. Width 520, height 300.</small>
+      <code id="u2"></code>
+    </div>
+  </div>
+
+  <button id="reset">Reset session stats</button>
+</main>
+<script src="overlay.js"></script>
+<script>
+  const base = location.origin;
+  document.getElementById('u1').textContent = base + '/scoreboard.html';
+  document.getElementById('u2').textContent = base + '/session.html';
+  const fit = () => { const f = document.getElementById('frame');
+    document.getElementById('pv').style.transform = `scale(${f.clientWidth / 1920})`; };
+  addEventListener('resize', fit); fit();
+  RL.connect(({ live }) => {
+    document.getElementById('dot').classList.toggle('on', live.connected);
+    document.getElementById('statusText').textContent = live.demo ? 'Demo mode: fake match data'
+      : live.connected ? 'Connected to Rocket League' : 'Waiting for Rocket League (is the game open?)';
+  });
+  document.getElementById('reset').onclick = () => {
+    if (confirm('Reset wins, losses and session stats?')) fetch('/api/session/reset', { method: 'POST' });
+  };
+</script>
+</body>
+</html>
