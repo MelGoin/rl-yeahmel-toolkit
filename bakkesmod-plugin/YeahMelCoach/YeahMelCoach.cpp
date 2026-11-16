@@ -99,7 +99,7 @@ void YeahMelCoach::Render(CanvasWrapper canvas)
 	const Vector2F size{ 300.f * scale, 168.f * scale };
 
 	// background panel
-	canvas.SetColor(10, 12, 18, 200);
+	canvas.SetColor((char)10, (char)12, (char)18, (char)200);
 	canvas.SetPosition(origin);
 	canvas.FillBox(size);
 
