@@ -114,6 +114,10 @@ config/              Stats API settings to paste into the game
 - A "fastest goal" leaderboard across sessions
 - Show mph instead of km/h: change `0.036` to `0.02237`
 
+## License
+
+MIT for this project's own code (see `LICENSE`). Third-party files keep their own terms; see `THIRD-PARTY-NOTICES.md`. Not affiliated with Psyonix or Epic Games.
+
 ## Sources
 
 - Psyonix Stats API docs: https://www.rocketleague.com/developer/stats-api
