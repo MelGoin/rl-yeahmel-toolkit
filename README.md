@@ -68,6 +68,16 @@ Session stats save to `data/session.json` and survive restarts. Reset them from 
 
 ## 4. BakkesMod plugin: YeahMel Coach
 
+**Quickest way (no Visual Studio):** every push builds the plugin automatically on GitHub. Open the repo's **Actions** tab → latest "Build YeahMel Coach plugin" run → download **YeahMelCoach-plugin**. Then in PowerShell:
+
+```powershell
+Copy-Item "$env:USERPROFILE\Downloads\YeahMelCoach.dll" "$env:APPDATA\bakkesmod\bakkesmod\plugins\"
+Unblock-File "$env:APPDATA\bakkesmod\bakkesmod\plugins\YeahMelCoach.dll"
+Add-Content "$env:APPDATA\bakkesmod\bakkesmod\cfg\plugins.cfg" "plugin load yeahmelcoach"
+```
+
+**Build it yourself instead:**
+
 A Free Play HUD that shows your last shot speed and your best shot of the session, plus touches and goals, with a pop-up whenever you set a new best.
 
 **Needs:** Windows, [Visual Studio 2022](https://visualstudio.microsoft.com/) with "Desktop development with C++", and [BakkesMod](https://bakkesmod.com) installed and run at least once (that installs the SDK).
